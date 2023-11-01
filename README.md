@@ -1,1 +1,4 @@
 # notion-library
+
+NOTION_KEY=secret_tHKbejdHWPcuhSwsplFBPPoohW32vtAgsBurHsUmEMg
+NOTION_PAGE_ID=c585bf17deac4715adb7d80b37445aa5?pvs=4
