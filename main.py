@@ -1,10 +1,16 @@
 import pandas as pd
-import requests
 import os
+from notion_client import Client
 from dotenv import load_dotenv
 
 # Load variables from .env file
 load_dotenv()
+
+# Notion API credentials and endpoint
+NOTION_KEY = os.getenv('NOTION_KEY')
+NOTION_PAGE_ID = os.getenv('NOTION_PAGE_ID')
+NOTION_API_ENDPOINT = f'https://api.notion.com/v1/pages'
+client = Client(auth=NOTION_KEY)
 
 # Read data from CSV
 data = pd.read_csv('test.csv')
@@ -35,43 +41,32 @@ for index, row in data.iterrows():
       else:
          book_ratings_map[book_name][-1] += 1
 
-# Notion API credentials and endpoint
-NOTION_KEY = os.getenv('NOTION_KEY')
-NOTION_PAGE_ID = os.getenv('NOTION_PAGE_ID')
-NOTION_API_ENDPOINT = f'https://api.notion.com/v1/pages'
+def write_row(client, database_id, book_name, avg, num_perfect_ratings):
+    client.pages.create(
+        **{
+          'parent': {
+            'database_id': database_id,
+          },
+          'properties': {
+              'Book Name': {
+                  'title': [
+                      {
+                          'text': {
+                              'content': book_name,
+                          },
+                      },
+                  ],
+              },
+              'Average Rating': {
+                  'number': float(avg),
+              },
+              'Number of Ratings': {
+                  'number': num_perfect_ratings,
+              },
+          },
+        }
+    )
 
-headers = {
-    'Authorization': f'Bearer {NOTION_KEY}',
-    'Content-Type': 'application/json',
-}
-
-for book_name in book_ratings_map.items():
-    value = book_ratings_map[book_name]
-    payload = {
-        'parent': {
-            'database_id': NOTION_DATABASE_ID,
-        },
-        'properties': {
-            'Book Name': {
-                'title': [
-                    {
-                        'text': {
-                            'content': book_name,
-                        },
-                    },
-                ],
-            },
-            'Average Rating': {
-                'number': float(value[0]),
-            },
-            'Number of Ratings': {
-                'number': value[2],
-            },
-        },
-    }
-    response = requests.post(NOTION_API_ENDPOINT, headers=headers, json=payload)
-
-    if response.status_code == 200:
-        print(f'Successfully added {book_name} with rating {rating} to Notion database.')
-    else:
-        print(f'Failed to add {book_name} to Notion database. Status code: {response.status_code}')
+for book_name in book_ratings_map:
+   value = book_ratings_map[book_name]
+   write_row(client, NOTION_PAGE_ID, book_name, value[0], value[2])
