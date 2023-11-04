@@ -1,4 +1,5 @@
 import pandas as pd
+import unicodedata
 import os
 from notion_client import Client
 from dotenv import load_dotenv
@@ -12,19 +13,21 @@ NOTION_PAGE_ID = os.getenv('NOTION_PAGE_ID')
 NOTION_API_ENDPOINT = f'https://api.notion.com/v1/pages'
 client = Client(auth=NOTION_KEY)
 
+
 # Read data from CSV
-data = pd.read_csv('test.csv')
-data.iloc[:, 0] = data.iloc[:, 0].str.upper()
+data = pd.read_csv('test.csv', encoding='utf-8', header = None)
 
 book_ratings_map = {}
 
 # Iterate over the rows and populate the hashmap
 for index, row in data.iterrows():
-    book_name = row.iloc[0]  # First column (index 0) is the book name
+    # uunicode = unicodedata.normalize('NFKD', row.iloc[0]).casefold()
+    book_name = row.iloc[0].casefold().strip()
     reader = row.iloc[1]
     rating = row.iloc[2]  # Third column (index 1) is the rating
 
     # Check if the book name is already in the hashmap
+    print(book_name)
     if book_name in book_ratings_map:
         # If yes, append the rating to the existing list of ratings
         book_ratings_map[book_name][1] += 1
@@ -33,13 +36,10 @@ for index, row in data.iterrows():
         currRating = (currRating + rating) / countRatings
         book_ratings_map[book_name][0] = currRating
     else:
-        book_ratings_map[book_name] = [rating, 1]
+        book_ratings_map[book_name] = [rating, 1, 0]
     
     if rating == 5:
-      if len(book_ratings_map[book_name]) == 2:
-         book_ratings_map[book_name].append(1)
-      else:
-         book_ratings_map[book_name][-1] += 1
+        book_ratings_map[book_name][-1] += 1
 
 def write_row(client, database_id, book_name, avg, num_perfect_ratings):
     client.pages.create(
