@@ -1,5 +1,5 @@
 ## Book Ratings Notion Database Populator
-##Overview
+## Overview
 This script is designed to populate a Notion database with book ratings data from a CSV file. It uses your Notion API key and a pre-existing table in Notion to update the database with entries for each book that received at least one rating. The script normalizes book names for extra whitespace and capitalization, calculates the average rating from all members, and counts the number of "Favorites" (books rated 5 stars).
 
 Prerequisites
@@ -14,13 +14,11 @@ Copy code
 git clone https://github.com/nataliet57/notion-library.git
 Install required Python packages:
 
-Copy code
+### Copy code
 pip install requests pandas notion_client os unicodedata
 
-Usage
+### Usage
 Run the script:
-
-Copy code
 python script.py
 Enter the path to the CSV file containing book ratings data when prompted.
 
