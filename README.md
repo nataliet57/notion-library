@@ -19,7 +19,8 @@ pip install requests pandas notion_client os unicodedata
 
 ### Usage
 Run the script:
-python script.py
+`python script.py`
+
 Enter the path to the CSV file containing book ratings data when prompted.
 
 The script will update your Notion database with the book ratings data. Duplicate entries are automatically handled.
